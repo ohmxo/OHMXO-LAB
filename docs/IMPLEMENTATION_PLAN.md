@@ -5,15 +5,14 @@
 > leaves the app buildable (`npm run build`) and testable (`npm test`).
 >
 > **Priority logic:** correctness wins (§7.1) come first because they make the site
-> cooler simply by working as designed. Then the chosen visible upgrades (§7.2 dimmer,
-> §7.6 BIOS) plus the desk-lamp toggle. (Rebrand to Ohmxo is already complete.)
+> cooler simply by working as designed. Then the BIOS easter eggs (§7.6).
+> (Rebrand to Ohmxo is already complete.)
 
 ## Scope
 
-- **In:** Fix the §7 bugs (⚠️) across camera, monitor, audio, film grain, renderer;
-  the chosen visible upgrades (§7.2 dimmer, §7.6 BIOS easter eggs, §7.4 audio fixes +
-  ducking) **and the desk-lamp toggle (new §7.9)**; per-file unit tests; Vitest already
-  scaffolded.
+- **In:** Fix the §7 bugs (⚠️) across camera, monitor, audio, renderer; the chosen
+  visible upgrade (§7.6 BIOS easter eggs) + §7.4 audio fixes/ducking; per-file unit
+  tests; Vitest already scaffolded.
 - **Out:** Full domain/GA/OS-URL swap (hardcode deferred until the inner site is chosen);
   day/night, second room, dust motes, scroll storytelling (§4 backlog); audio-reactive
   analyser→uniforms (depends on the pool-key fix settling first); own inner OS in the
@@ -36,45 +35,31 @@
     angle/distance math in `update()` actually darkens the reflection stack at glancing
     angles; if it stays invisible, replace the approach (per §7.2).
 
-[ ] **4. Add the desk-lamp toggle** — `NEW src/Application/World/DeskLamp.ts` +
-    `World.ts`. Constraint: the whole scene is baked-lit (`BakedModel` → `MeshBasicMaterial`,
-    zero dynamic lights), so the lamp's glow is baked into the texture as "on". Add a small
-    emissive glow mesh + a soft light-spill gradient over the desk that fades in/out when the
-    lamp is toggled, controlled via a keyboard key. Start from the baked "on" state; "off"
-    dims the glow plane rather than re-baking. Verify final look in `npm run dev`.
-
-[ ] **5. Fix the audio engine** — `src/Application/Audio/AudioManager.ts`,
+[ ] **4. Fix the audio engine** — `src/Application/Audio/AudioManager.ts`,
     `AudioSources.ts`. Use a monotonic counter for `poolKey` (stop key collisions from
     the shrinking pool); floor the ambience filter at ~100 Hz and re-tune the 0.1 volume
     clamp; ramp `playAudio` gain over ~50 ms to kill clicks/pops; persist mute to
     `localStorage`. Add unit tests for the pool-key counter and the frequency floor.
 
-[ ] **6. Add ambience ducking on monitor entry** — same files. `enterMonitor` dips +
+[ ] **5. Add ambience ducking on monitor entry** — same files. `enterMonitor` dips +
     lowpasses the ambience; `leftMonitor` crossfades back (not a snap). Drive off the
     existing `enterMonitor`/`leftMonitor` camera events.
 
-[ ] **7. Fix the film-grain + overlay** — `src/Application/Renderer.ts`,
-    `src/Application/Shaders/screen/*`. Replace `u_time = Math.sin(time.current*0.01)`
-    with a steadily increasing value; fix the invalid `zIndex = '1px'` → `'1'`; add a
-    subtle vignette to the same fullscreen pass.
-
-[ ] **8. Make the BIOS boot screen interactive** — `src/Application/UI/components/LoadingScreen.tsx`.
+[ ] **6. Make the BIOS boot screen interactive** — `src/Application/UI/components/LoadingScreen.tsx`.
     Wire progress to real load events (progress = `loaded/toLoad`); add ESC to
     fast-forward the RAM check and DEL to open a fake BIOS setup panel; optionally reuse
     the `_AUTO_` typing sound for a boot-log typewriter effect. (Ohmxo branding already done.)
 
-[ ] **9. Cleanup + cross-cutting** — remove dead `idle` self-assignment fallout, pause
-    the `Time` rAF loop on `document.hidden`, add dynamic resolution scaling when frame
-    time > 40 ms, type the `postMessage` contract in `MonitorScreen.ts`.
+[ ] **7. Cleanup + cross-cutting** — remove dead `idle` self-assignment fallout; fix the
+    invalid `zIndex = '1px'` → `'1'` in `Renderer.ts`; pause the `Time` rAF loop on
+    `document.hidden`; add dynamic resolution scaling when frame time > 40 ms; type the
+    `postMessage` contract in `MonitorScreen.ts`.
 
-[ ] **10. Full validation** — `npm test`, `npm run build`, then `npm run dev` and
-    manually click through: idle cover, monitor entry/exit, desk-lamp on/off, BIOS DEL/ESC,
-    Ohmxo boot branding, mute persistence.
+[ ] **8. Full validation** — `npm test`, `npm run build`, then `npm run dev` and
+    manually click through: idle cover, monitor entry/exit, BIOS DEL/ESC, Ohmxo boot
+    branding, mute persistence.
 
 ## Open questions
 
-- **Lamp model** — the decor comes from baked `.glb` models with no named lamp mesh in
-  source. Can you point out the lamp's approximate position ($x, y, z$) in the scene, or
-  should I probe the baked model/UVs at runtime to locate it before placing the glow?
 - **Scope lock** — should the §4 backlog features (day/night, second room) be sequenced
   after this plan, or held as separate follow-on plans?
