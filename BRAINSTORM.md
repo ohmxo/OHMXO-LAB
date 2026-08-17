@@ -181,6 +181,24 @@ The BIOS theme *is* the site's personality — improve the existing one, don't r
 - Lazy-load the iframe until first interaction (defer the OS site until "START").
 - Type the `postMessage` contract (`MonitorScreen.ts:150-181` is all `// @ts-ignore` + untyped `event.data.type`) — the most untyped surface in the app.
 
-**How to pick:** every ⚠️ above is a *correctness* win (the site gets cooler simply by working as designed). The biggest *visible* upgrades are §7.2 (dimmer fix + glare + power button), §7.3 (steam layers + mouse), and §7.6 (BIOS easter eggs). Start there.
+### 7.9 Wow idea — toggleable desk lamp
+
+> **Branding note for the whole repo:** it's **Ohmxo** (Jacob's digital-architecture
+> agency — Nexus web / Agentix AI / Digital Marketing). Replace "Heffernan / Henry Inc."
+> and "Henry Heffernan Portfolio Showcase" in `LoadingScreen.tsx`, `readme.md`, and the
+> monitor iframe `title = 'HeffernanOS'` with Ohmxo/Jacob text.
+
+- **Constraint:** the scene is baked-lit (`BakedModel.ts` gives every mesh one
+  `MeshBasicMaterial.map` — zero dynamic lights). So the lamp's "on" glow is already fired
+  into the baked texture. A real `PointLight` would wash out the baked look and cost perf.
+- **Approach:** instead of a light, add a small **emissive glow mesh** + a soft
+  **light-spill gradient plane** over the desk, faded in/out when toggled. Start "on";
+  "off" dims the glow plane rather than re-baking. Registers as a **hotspot** (§7.7) so the
+  lamp is clickable, plus a keyboard key.
+- **Extra juice:** tie the glow flicker or intensity to the film-grain/audio (§4.1) later.
+- **Open:** the lamp lives in `static/models/Decor/decor.glb` — no named mesh in source,
+  so pin down its position before placing the glow.
+
+**How to pick:** every ⚠️ above is a *correctness* win (the site gets cooler simply by working as designed). The biggest *visible* upgrades are §7.2 (dimmer fix + glare + power button), §7.3 (steam layers + mouse), §7.9 (desk lamp), and §7.6 (BIOS easter eggs + Ohmxo rebrand). Start there.
 
 See `docs/superpowers/plans/2026-08-17-improve-portfolio.md` for the executable plan.
