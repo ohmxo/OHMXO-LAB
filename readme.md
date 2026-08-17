@@ -1,6 +1,9 @@
-# henryheffernan.com
+# OHMXO
 
-This is one of two repositories created for my portfolio website <a href="https://henryheffernan.com/"><samp>henryheffernan.com</samp></a>. If you are looking for the 2D OS repository you can find it <a href="https://github.com/henryjeff/portfolio-inner-site"><samp>here</samp></a>! Thanks for taking the time to check this out. If you have any questions of comments, feel free to shoot me an email at <samp><a href="mailto:henryheffernan@gmail.com">henryheffernan@gmail.com</a></samp> or you can DM me on twitter <a href="https://twitter.com/henryheffernan"><samp>@henryheffernan</samp></a>.
+An interactive 3D portfolio for <a href="https://ohmxo.co/"><samp>OHMXO</samp></a> — a digital
+architecture firm building comprehensive digital ecosystems for artists, brands, and
+creative enterprises. Explore a stylized desk scene and click the computer to enter a
+live inner site.
 
 <br>
 

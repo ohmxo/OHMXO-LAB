@@ -9,11 +9,11 @@ import Camera from '../Camera/Camera';
 import EventEmitter from '../Utils/EventEmitter';
 
 const SCREEN_SIZE = { w: 1280, h: 1024 };
-const IFRAME_PADDING = 32;
-const IFRAME_SIZE = {
-    w: SCREEN_SIZE.w - IFRAME_PADDING,
-    h: SCREEN_SIZE.h - IFRAME_PADDING,
-};
+// GNRE is a fixed 1440px-wide Framer canvas. To make it fill the screen edge-to-edge
+// (no inset padding gap), scale the 1440px design down to the exact screen size.
+const IFRAME_DESIGN_WIDTH = 1440;
+const IFRAME_SCALE = SCREEN_SIZE.w / IFRAME_DESIGN_WIDTH;
+const IFRAME_DESIGN_HEIGHT = Math.round(SCREEN_SIZE.h / IFRAME_SCALE);
 
 export default class MonitorScreen extends EventEmitter {
     application: Application;
@@ -134,15 +134,36 @@ export default class MonitorScreen extends EventEmitter {
      * Creates the iframe for the computer screen
      */
     createIframe() {
-        // Create container
+        // GNRE is a fixed 1440px-wide Framer canvas. Render it at its native width,
+        // then scale the whole thing down to exactly fill the screen panel (no inset
+        // padding gap) and clip overflow instead of leaving empty gaps at the edges.
+        const designWidth = IFRAME_DESIGN_WIDTH;
+        const designHeight = IFRAME_DESIGN_HEIGHT;
+        const scale = IFRAME_SCALE;
+
+        // Container = the CSS3D plane, exactly the screen panel size
         const container = document.createElement('div');
-        container.style.width = this.screenSize.width + 'px';
-        container.style.height = this.screenSize.height + 'px';
+        container.style.width = SCREEN_SIZE.w + 'px';
+        container.style.height = SCREEN_SIZE.h + 'px';
+        container.style.overflow = 'hidden';
+        container.style.position = 'relative';
         container.style.opacity = '1';
         container.style.background = '#1d2e2f';
 
+        // Scaled wrapper fills the whole screen with the site's native width
+        const wrapper = document.createElement('div');
+        wrapper.style.width = designWidth + 'px';
+        wrapper.style.height = designHeight + 'px';
+        wrapper.style.transformOrigin = '0 0';
+        wrapper.style.transform = `scale(${scale})`;
+
         // Create iframe
         const iframe = document.createElement('iframe');
+        iframe.width = String(designWidth);
+        iframe.height = String(designHeight);
+        iframe.style.width = designWidth + 'px';
+        iframe.style.height = designHeight + 'px';
+        iframe.style.border = '0';
 
         // Bubble mouse move events to the main application, so we can affect the camera
         iframe.onload = () => {
@@ -158,16 +179,15 @@ export default class MonitorScreen extends EventEmitter {
                     if (event.data.type === 'mousemove') {
                         var clRect = iframe.getBoundingClientRect();
                         const { top, left, width, height } = clRect;
-                        const widthRatio = width / IFRAME_SIZE.w;
-                        const heightRatio = height / IFRAME_SIZE.h;
-
+                        // Inner site reports coords in its 1440px design space;
+                        // map them to the scaled, screen-space position.
                         // @ts-ignore
                         evt.clientX = Math.round(
-                            event.data.clientX * widthRatio + left
+                            (event.data.clientX * width) / designWidth + left
                         );
-                        //@ts-ignore
+                        // @ts-ignore
                         evt.clientY = Math.round(
-                            event.data.clientY * heightRatio + top
+                            (event.data.clientY * height) / designHeight + top
                         );
                     } else if (event.data.type === 'keydown') {
                         // @ts-ignore
@@ -184,7 +204,7 @@ export default class MonitorScreen extends EventEmitter {
 
         // Set iframe attributes
         // PROD
-        iframe.src = 'https://os.henryheffernan.com/';
+        iframe.src = 'https://gnre-agency.framer.website/';
         /**
          * Use dev server is query params are present
          *
@@ -196,18 +216,15 @@ export default class MonitorScreen extends EventEmitter {
         if (urlParams.has('dev')) {
             iframe.src = 'http://localhost:3000/';
         }
-        iframe.style.width = this.screenSize.width + 'px';
-        iframe.style.height = this.screenSize.height + 'px';
-        iframe.style.padding = IFRAME_PADDING + 'px';
-        iframe.style.boxSizing = 'border-box';
         iframe.style.opacity = '1';
         iframe.className = 'jitter';
         iframe.id = 'computer-screen';
         iframe.frameBorder = '0';
-        iframe.title = 'HeffernanOS';
+        iframe.title = 'GNRE Agency';
 
-        // Add iframe to container
-        container.appendChild(iframe);
+        // Add iframe (scaled) to the screen container
+        wrapper.appendChild(iframe);
+        container.appendChild(wrapper);
 
         // Create CSS plane
         this.createCssPlane(container);
@@ -284,13 +301,13 @@ export default class MonitorScreen extends EventEmitter {
             video: {
                 texture: this.videoTextures['video-1'],
                 blending: THREE.AdditiveBlending,
-                opacity: 0.5,
+                opacity: 0.06,
                 offset: 10,
             },
             video2: {
                 texture: this.videoTextures['video-2'],
                 blending: THREE.AdditiveBlending,
-                opacity: 0.1,
+                opacity: 0.03,
                 offset: 15,
             },
         };
